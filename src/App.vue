@@ -264,6 +264,12 @@ export default {
         const horarioIndex = obj.DIA.indexOf(dia);
         const horario = obj.HORARIO[horarioIndex];
         const horarioIndex2 = this.hours.indexOf(horario);
+
+        if (horarioIndex2 == -1 || diaIndex == -1) {
+          console.log('horarioIndex2 == -1 || diaIndex == -1')
+          return;
+        }
+
         this.tabela[horarioIndex2][diaIndex] = valor;
       });
     },
