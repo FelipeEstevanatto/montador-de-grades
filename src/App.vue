@@ -50,7 +50,7 @@
             >
               Limpar grade<font-awesome-icon
                 class="pl-1 text-base text-red-darken-2"
-                icon="fa-solid fa-x"
+                icon="fa-solid fa-xmark"
               />
             </CustomButton>
             <CustomButton

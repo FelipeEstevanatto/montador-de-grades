@@ -12,7 +12,7 @@
     <button @click="show = false" class="absolute top-0 bottom-0 right-1 py-2 h-fit">
       <font-awesome-icon
         class="fill-current h-4 w-4 text-blue-900"
-        icon="fa-solid fa-x"
+        icon="fa-solid fa-xmark"
       />
     </button>
     <slot></slot>
