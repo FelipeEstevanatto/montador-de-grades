@@ -28,7 +28,6 @@ const emit = defineEmits(["updateValue"]);
 const itensFiltered = ref([]);
 const allUnfilteredDisciplines = ref([]);
 const search = ref("");
-const loading = ref(false);
 const isListEmpty = ref(false);
 
 const COLOR_BLUE = "#385F73";
@@ -75,7 +74,7 @@ async function fetchDisciplinas() {
 // Function that updates the data based on the selected disciplines
 async function updateData() {
   //const selectedList = toRaw(props.selectedList);
-  const ids = listaSelecionadasIds.value;
+  const ids = selectedIdsList.value;
   itensFiltered.value = allUnfilteredDisciplines.value.filter(filterSubject);
 
   if (props.show_not_avaliable) {
@@ -140,18 +139,15 @@ function filterSubject(item) {
     return true;
   }
 
-  const hasHorario = props.horario ? item.HORARIO.includes(props.horario) : true;
-  const hasDia = props.dia ? item.DIA.includes(props.dia) : true;
+  const hasTime = props.horario ? item.HORARIO.includes(props.horario) : true;
+  const hasDay = props.dia ? item.DIA.includes(props.dia) : true;
 
-  return hasHorario && hasDia;
+  return hasTime && hasDay;
 }
 
 function emitValue(item) {
-  loading.value = true;
   emit("updateValue", item);
-  updateData().finally(() => {
-    loading.value = false;
-  });
+  updateData()
 }
 
 // Format time to be displayed
@@ -159,7 +155,7 @@ function format_time(item) {
   return item.DIA.map((dia, index) => `${dia} - ${item.HORARIO[index]}`).join("\r\n");
 }
 
-const listaSelecionadasIds = computed(() =>
+const selectedIdsList = computed(() =>
   props.selectedList.map((item) => item.ID)
 );
 </script>
@@ -199,14 +195,12 @@ const listaSelecionadasIds = computed(() =>
             <CustomButton
               class="px-2 h-9 mr-2 border-solid uppercase font-medium"
               @click="emitValue(item)"
-              :disabled="loading"
             >
               Adicionar
             </CustomButton>
             <CustomButton
               class="px-2 h-9 uppercase"
               @click="description(item)"
-              :disabled="loading"
             >
               Descrição
             </CustomButton>
