@@ -19,7 +19,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(row, rowIndex) in tabela" class="even:bg-gray-100">
+              <tr v-for="(row, rowIndex) in table" class="even:bg-gray-100">
                 <td class="whitespace-nowrap border-solid border-1 border-black">
                   {{ hours[rowIndex] }}
                 </td>
@@ -81,11 +81,11 @@
             <div class="-m-3 flex flex-auto flex-wrap bg-white mb-10 sm:-m-3 order-2">
               <div class="grow basis-0 w-full p-3">
                 <h3 class="font-bold block text-xl m-0">Disciplinas Escolhidas:</h3>
-                Total de Créditos: {{ quantidade * 2 }}
+                Total de Créditos: {{ credits * 2 }}
                 <div
                   class="v-card shadow-lg p-2 bg-white overflow-y-scroll h-[300px] rounded"
                 >
-                  <div class="v-card mx-auto mb-2" v-for="value in ListaIdsSelecionadas">
+                  <div class="v-card mx-auto mb-2" v-for="value in SelectedIdsList">
                     <div class="border-1 border-black rounded">
                       <div class="px-4 py-3">
                         <div
@@ -120,19 +120,24 @@
                 <h3 class="block text-xl font-bold">Disciplinas Disponíveis:</h3>
                 <div class="">
                   <ListaUC
-                    :btn_state_change="btn_state"
+                    :show_not_avaliable="btn_state"
                     :horario="null"
                     :dia="null"
-                    :listaSelecionadas="ListaIdsSelecionadas"
+                    :selectedList="SelectedIdsList"
                     @updateValue="updateValue"
                   ></ListaUC>
                 </div>
-                <CustomButton
+                <Switch
+                  v-model="btn_state"
+                  text="Mostrar Disciplinas Indisponíveis"
+                  id="btn_state"
+                />
+                <!-- <CustomButton
                   class="mt-2 py-2 px-12 border-black uppercase w-full h-auto"
                   @click="change_btn_state_conflict()"
                 >
-                  <span class="text-wrap">Remover Disciplinas Indisponíveis</span>
-                </CustomButton>
+                  <span class="text-wrap">Mostrar Disciplinas Indisponíveis</span>
+                </CustomButton> -->
               </div>
             </div>
           </div>
@@ -163,7 +168,7 @@
     <ListaUC
       :horario="hours[this.row]"
       :dia="daysOfWeek[this.col]"
-      :listaSelecionadas="ListaIdsSelecionadas"
+      :selectedList="SelectedIdsList"
       @updateValue="updateValue"
     ></ListaUC>
   </Modal>
@@ -180,6 +185,7 @@ import ListaUC from "./components/Lista.vue";
 import html2canvas from "html2canvas";
 import Alert from "./components/Alert.vue";
 import CustomButton from "./components/CustomButton.vue";
+import Switch from "./components/Switch.vue";
 
 export default {
   components: {
@@ -188,19 +194,20 @@ export default {
     ListaUC,
     Alert,
     CustomButton,
+    Switch,
   },
   name: "App",
   data() {
     return {
       alert: true,
       showModal: false,
-      tabela: Array.from({ length: 6 }, () => Array(6).fill("")),
+      table: Array.from({ length: 6 }, () => Array(6).fill("")),
       col: 0,
       row: 0,
-      quantidade: 0,
+      credits: 0,
       btn_state: false,
       // O controle das disciplinas será através dos ids das disciplinas
-      ListaIdsSelecionadas: JSON.parse(localStorage.ListaIdsSelecionadas || "[]"),
+      SelectedIdsList: JSON.parse(localStorage.SelectedIdsList || "[]"),
     };
   },
   computed: {
@@ -219,15 +226,15 @@ export default {
     },
   },
   mounted() {
-    this.quantidade = 0;
-    this.ListaIdsSelecionadas.forEach((value) => {
+    this.credits = 0;
+    this.SelectedIdsList.forEach((value) => {
       this.updateTable(value, value);
-      this.quantidade += value.HORARIO.length;
+      this.credits += value.HORARIO.length;
     });
   },
   methods: {
     showAlert(rowIndex, colIndex) {
-      const cellValue = this.tabela[rowIndex][colIndex];
+      const cellValue = this.table[rowIndex][colIndex];
 
       if (cellValue === "") {
         this.row = rowIndex;
@@ -238,71 +245,68 @@ export default {
       }
 
       // Removendo matéria
-      const selectedSubject = this.ListaIdsSelecionadas.find(
+      const selectedSubject = this.SelectedIdsList.find(
         (item) => item.ID === cellValue.ID
       );
-      const selectedSubjectIndex = this.ListaIdsSelecionadas.indexOf(selectedSubject);
+      const selectedSubjectIndex = this.SelectedIdsList.indexOf(selectedSubject);
       const selectedSubjectHours = selectedSubject.HORARIO.length;
 
-      this.quantidade -= selectedSubjectHours;
-      this.ListaIdsSelecionadas.splice(selectedSubjectIndex, 1);
-      localStorage.ListaIdsSelecionadas = JSON.stringify(this.ListaIdsSelecionadas);
+      this.credits -= selectedSubjectHours;
+      this.SelectedIdsList.splice(selectedSubjectIndex, 1);
+      localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
 
       for (let i = 0; i < cellValue.DIA.length; i++) {
         const dayIndex = this.daysOfWeek.indexOf(cellValue.DIA[i]);
         const hourIndex = this.hours.indexOf(cellValue.HORARIO[i]);
-        this.tabela[hourIndex][dayIndex] = "";
+        this.table[hourIndex][dayIndex] = "";
       }
 
-      this.tabela[rowIndex][colIndex] = "";
+      this.table[rowIndex][colIndex] = "";
 
       return;
     },
-    updateTable(obj, valor) {
-      obj.DIA.forEach((dia) => {
+    // Updates the table with the selected subjects
+    updateTable(object, value) {
+      object.DIA.forEach((dia) => {
         const diaIndex = this.daysOfWeek.indexOf(dia);
-        const horarioIndex = obj.DIA.indexOf(dia);
-        const horario = obj.HORARIO[horarioIndex];
-        const horarioIndex2 = this.hours.indexOf(horario);
 
-        if (horarioIndex2 == -1 || diaIndex == -1) {
-          console.log('horarioIndex2 == -1 || diaIndex == -1')
-          return;
-        }
-
-        this.tabela[horarioIndex2][diaIndex] = valor;
+        object.HORARIO.forEach((horario) => {
+          const horarioIndex = this.hours.indexOf(horario);
+          this.table[horarioIndex][diaIndex] = value;
+        });
       });
     },
     updateValue(value) {
       this.updateTable(value, value);
 
-      this.ListaIdsSelecionadas.push(value);
-      localStorage.ListaIdsSelecionadas = JSON.stringify(this.ListaIdsSelecionadas);
+      if (this.SelectedIdsList.some((item) => item.ID == value.ID)) {
+        return;
+      }
+      this.SelectedIdsList.push(value);
+      localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
 
       this.showModal = false;
-      this.quantidade += value.HORARIO.length;
+      this.credits += value.HORARIO.length;
     },
 
     cleanAll() {
-      this.ListaIdsSelecionadas = [];
-      localStorage.ListaIdsSelecionadas = JSON.stringify(this.ListaIdsSelecionadas);
+      this.SelectedIdsList.splice(0, this.SelectedIdsList.length);
+      localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
       for (let i = 0; i < 6; i++) {
         for (let j = 0; j < 6; j++) {
-          this.tabela[i][j] = "";
+          this.table[i][j] = "";
         }
       }
-      this.quantidade = 0;
+      this.credits = 0;
     },
     removeUC(obj) {
-      this.ListaIdsSelecionadas = this.ListaIdsSelecionadas.filter(
-        (item) => item.ID !== obj.ID
-      );
-      localStorage.ListaIdsSelecionadas = JSON.stringify(this.ListaIdsSelecionadas);
+      this.SelectedIdsList.splice(this.SelectedIdsList.indexOf(obj), 1);
+      localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
       this.updateTable(obj, "");
-      this.quantidade -= obj.HORARIO.length;
+      this.credits -= obj.HORARIO.length;
     },
     save() {
-      const UcsSelecionadasToJson = JSON.stringify(this.ListaIdsSelecionadas);
+      const UcsSelecionadasToJson = JSON.stringify(this.SelectedIdsList);
       const aux = document.createElement("a");
       const file = new Blob([UcsSelecionadasToJson], { type: "text/json" });
       aux.href = URL.createObjectURL(file);
@@ -317,7 +321,7 @@ export default {
       inputFileDocument.addEventListener(
         "change",
         (event) => {
-          ListId = this.ListaIdsSelecionadas;
+          ListId = this.SelectedIdsList;
           thisObjAlias = this;
           var reader = new FileReader();
           reader.readAsText(inputFileDocument.files[0]);
@@ -332,7 +336,6 @@ export default {
     },
     screenShot() {
       let div = document.getElementById("canvas");
-      console.log(div);
       // Use the html2canvas to take a screenshot at 2x device pixel ratio
       // and append it to the output div
       window.devicePixelRatio = 2;
@@ -356,13 +359,13 @@ export default {
 
 function loadtoTableAfterParse() {
   ListId = JSON.parse(FileData);
-  thisObjAlias.ListaIdsSelecionadas = [];
-  localStorage.ListaIdsSelecionadas = thisObjAlias.ListaIdsSelecionadas;
+  thisObjAlias.SelectedIdsList = [];
+  localStorage.SelectedIdsList = thisObjAlias.SelectedIdsList;
   ListId.forEach((value) => {
     thisObjAlias.updateTable(value, value);
-    thisObjAlias.ListaIdsSelecionadas.push(value);
-    localStorage.ListaIdsSelecionadas = thisObjAlias.ListaIdsSelecionadas;
-    thisObjAlias.quantidade += value.HORARIO.length;
+    thisObjAlias.SelectedIdsList.push(value);
+    localStorage.SelectedIdsList = thisObjAlias.SelectedIdsList;
+    thisObjAlias.credits += value.HORARIO.length;
   });
 
   thisObjAlias = undefined;

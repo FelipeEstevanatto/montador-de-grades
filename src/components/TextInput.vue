@@ -25,7 +25,6 @@ export default {
   },
   methods: {
     search() {
-      console.log("emit search");
       this.$emit("search", this.query);
     },
   },
