@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, computed, onMounted, toRaw } from "vue";
-import axios from "axios";
+import jsonDisciplines from "../data/disciplines.json";
 import deburr from "lodash/deburr";
 import TextInput from "./TextInput.vue";
 import CustomButton from "./CustomButton.vue";
@@ -58,9 +58,7 @@ watch(
 // Function that fetches the disciplines from the server
 async function fetchDisciplinas() {
   try {
-    const { data } = await axios.get("/src/data/disciplinas.json");
-
-    allUnfilteredDisciplines.value = data.map((item) => ({
+    allUnfilteredDisciplines.value = jsonDisciplines.map((item) => ({
       ...item,
       COLOR: COLOR_RED,
     }));
