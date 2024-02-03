@@ -51,8 +51,6 @@ watch(
 watch(
   () => props.show_not_avaliable,
   (newVal, oldVal) => {
-    //console.log('show_not_avaliable changed from', oldVal, 'to', newVal);
-    // You can add your logic here
     updateData();
   }
 )
@@ -89,7 +87,7 @@ async function updateData() {
       const selectedDiscipline = allUnfilteredDisciplines.value.find(
         (discipline) => discipline.ID === id
       );
-      return selectedDiscipline.NOME === item.NOME;
+      return selectedDiscipline.NAME === item.NAME;
     });
   });
 
@@ -98,10 +96,10 @@ async function updateData() {
     ids.includes(item.ID)
   );
   const selectedTimes = selectedDisciplines.flatMap((item) =>
-    item.HORARIO.map((horario, index) => `${item.DIA[index]}-${horario}`)
+    item.HOUR.map((horario, index) => `${item.DAY[index]}-${horario}`)
   );
   itensFiltered.value = itensFiltered.value.filter((item) => {
-    const times = item.HORARIO.map((horario, index) => `${item.DIA[index]}-${horario}`);
+    const times = item.HOUR.map((horario, index) => `${item.DAY[index]}-${horario}`);
     return !times.some((time) => selectedTimes.includes(time));
   });
 
@@ -119,7 +117,7 @@ function filterSearch() {
   const regex = /[\u0300-\u036f]/g;
   const normalizedQuery = query.normalize("NFD").replace(regex, "");
   itensFiltered.value = itensFiltered.value.filter((item) => {
-    const normalizedItemName = item.NOME.normalize("NFD").replace(regex, "");
+    const normalizedItemName = item.NAME.normalize("NFD").replace(regex, "");
     return deburr(normalizedItemName).toLowerCase().includes(deburr(normalizedQuery));
   });
   isListEmpty.value = itensFiltered.value.length === 0;
@@ -128,7 +126,7 @@ function filterSearch() {
 // Function that opens the pdf file of the discipline
 function description(obj) {
   // retira todos os textos entre parênteses ou colchetes e substitui os espaços por underline
-  const name = obj.NOME.replace(/\s*\([^)]*\)/g, "").replace(/ /g, "_");
+  const name = obj.NAME.replace(/\s*\([^)]*\)/g, "").replace(/ /g, "_");
 
   window.open(base_address + name[0] + "/" + name + ".pdf", "_blank");
 }
@@ -139,8 +137,8 @@ function filterSubject(item) {
     return true;
   }
 
-  const hasTime = props.horario ? item.HORARIO.includes(props.horario) : true;
-  const hasDay = props.dia ? item.DIA.includes(props.dia) : true;
+  const hasTime = props.horario ? item.HOUR.includes(props.horario) : true;
+  const hasDay = props.dia ? item.DAY.includes(props.dia) : true;
 
   return hasTime && hasDay;
 }
@@ -152,7 +150,7 @@ function emitValue(item) {
 
 // Format time to be displayed
 function format_time(item) {
-  return item.DIA.map((dia, index) => `${dia} - ${item.HORARIO[index]}`).join("\r\n");
+  return item.DAY.map((dia, index) => `${dia} - ${item.HOUR[index]}`).join("\r\n");
 }
 
 const selectedIdsList = computed(() =>
@@ -179,16 +177,16 @@ const selectedIdsList = computed(() =>
           <div
             class="v-card-title block flex-none font-medium min-w-0 overflow-hidden text-ellipsis normal-case whitespace-nowrap break-normal h6"
           >
-            {{ item.NOME }}
+            {{ item.NAME }}
           </div>
           <div
             class="normal-case flex-auto text-xs font-normal tracking-wide px-4 pb-4 pt-0"
           >
             <span
-              class="text-white font-mono whitespace-pre-wrap text-base lista-horario"
+              class="text-white font-mono whitespace-pre-wrap text-base"
               >{{ format_time(item) }}</span
             ><br />
-            <span>Professores/Turma: {{ item.PROFESSORES }} - {{ item.TURMA }}</span>
+            <span>Professores/Turma: {{ item.PROFESSORS }} - {{ item.CLASS_INFO }}</span>
           </div>
 
           <div  class="px-2 py-2 tracking-widerx flex *:rounded *:border-1 *:border-white">

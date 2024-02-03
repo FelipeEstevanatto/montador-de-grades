@@ -32,9 +32,9 @@
                     class="text-[100%] flex flex-col gap-y-1 w-full whitespace-pre-wrap border-collapse"
                   >
                     <div class="">
-                      {{ value.NOME }}
+                      {{ value.NAME }}
                     </div>
-                    <div>{{ value.TURMA }} - {{ value.PROFESSORES }}</div>
+                    <div>{{ value.CLASS_INFO }} - {{ value.PROFESSORS }}</div>
                   </div>
                 </td>
               </tr>
@@ -91,17 +91,17 @@
                         <div
                           class="text-xs text-overline mb-1 tracking-widest2x uppercase"
                         >
-                          Turma - {{ value.TURMA }}
+                          Turma - {{ value.CLASS_INFO }}
                         </div>
                         <div
                           class="normal-case font-sans text-xl font-medium leading-8 mb-1"
                         >
-                          {{ value.NOME }}
+                          {{ value.NAME }}
                         </div>
                         <div
                           class="text-2xs font-normal leading-5 tracking-wide font-sans normal-case"
                         >
-                          Professor(a): {{ value.PROFESSORES }}
+                          Professor(a): {{ value.PROFESSORS }}
                         </div>
                       </div>
                       <div class="min-h-[52px] flex flex-none items-center p-2">
@@ -132,12 +132,6 @@
                   text="Mostrar Disciplinas Indisponíveis"
                   id="btn_state"
                 />
-                <!-- <CustomButton
-                  class="mt-2 py-2 px-12 border-black uppercase w-full h-auto"
-                  @click="change_btn_state_conflict()"
-                >
-                  <span class="text-wrap">Mostrar Disciplinas Indisponíveis</span>
-                </CustomButton> -->
               </div>
             </div>
           </div>
@@ -229,7 +223,7 @@ export default {
     this.credits = 0;
     this.SelectedIdsList.forEach((value) => {
       this.updateTable(value, value);
-      this.credits += value.HORARIO.length;
+      this.credits += value.HOUR.length;
     });
   },
   methods: {
@@ -249,15 +243,15 @@ export default {
         (item) => item.ID === cellValue.ID
       );
       const selectedSubjectIndex = this.SelectedIdsList.indexOf(selectedSubject);
-      const selectedSubjectHours = selectedSubject.HORARIO.length;
+      const selectedSubjectHours = selectedSubject.HOUR.length;
 
       this.credits -= selectedSubjectHours;
       this.SelectedIdsList.splice(selectedSubjectIndex, 1);
       localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
 
-      for (let i = 0; i < cellValue.DIA.length; i++) {
-        const dayIndex = this.daysOfWeek.indexOf(cellValue.DIA[i]);
-        const hourIndex = this.hours.indexOf(cellValue.HORARIO[i]);
+      for (let i = 0; i < cellValue.DAY.length; i++) {
+        const dayIndex = this.daysOfWeek.indexOf(cellValue.DAY[i]);
+        const hourIndex = this.hours.indexOf(cellValue.HOUR[i]);
         this.table[hourIndex][dayIndex] = "";
       }
 
@@ -267,10 +261,10 @@ export default {
     },
     // Updates the table with the selected subjects
     updateTable(object, value) {
-      object.DIA.forEach((dia) => {
+      object.DAY.forEach((dia) => {
         const diaIndex = this.daysOfWeek.indexOf(dia);
 
-        object.HORARIO.forEach((horario) => {
+        object.HOUR.forEach((horario) => {
           const horarioIndex = this.hours.indexOf(horario);
           this.table[horarioIndex][diaIndex] = value;
         });
@@ -286,7 +280,7 @@ export default {
       localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
 
       this.showModal = false;
-      this.credits += value.HORARIO.length;
+      this.credits += value.HOUR.length;
     },
 
     cleanAll() {
@@ -303,7 +297,7 @@ export default {
       this.SelectedIdsList.splice(this.SelectedIdsList.indexOf(obj), 1);
       localStorage.SelectedIdsList = JSON.stringify(this.SelectedIdsList);
       this.updateTable(obj, "");
-      this.credits -= obj.HORARIO.length;
+      this.credits -= obj.HOUR.length;
     },
     save() {
       const UcsSelecionadasToJson = JSON.stringify(this.SelectedIdsList);
@@ -351,9 +345,6 @@ export default {
         canvas.remove();
       });
     },
-    change_btn_state_conflict() {
-      this.btn_state = !this.btn_state;
-    },
   },
 };
 
@@ -365,7 +356,7 @@ function loadtoTableAfterParse() {
     thisObjAlias.updateTable(value, value);
     thisObjAlias.SelectedIdsList.push(value);
     localStorage.SelectedIdsList = thisObjAlias.SelectedIdsList;
-    thisObjAlias.credits += value.HORARIO.length;
+    thisObjAlias.credits += value.HOUR.length;
   });
 
   thisObjAlias = undefined;

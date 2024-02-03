@@ -1,16 +1,18 @@
 # Sometimes the data is not in the correct format '8h00 - 10h00' should be '08h00-10h00'
 
 import pandas as pd
+import re
+from datetime import datetime
 
 data_frame = pd.read_excel("grade_2024_01.xlsx")
 
 # Define the days and their corresponding columns in the Excel file
 days = {'Segunda': ['C', 'K'],
-        'Terca': ['L', 'T'],
+        'Terça': ['L', 'T'],
         'Quarta': ['U', 'AD'],
         'Quinta': ['AE', 'AL'],
         'Sexta': ['AM', 'AP'],
-        'Sabado': ['AQ', 'AS']}
+        'Sábado': ['AQ', 'AS']}
 
 # Function to convert Excel column letter to index
 def convert_to_index(column: str):
@@ -31,8 +33,22 @@ class UC:
         self.NAME = str(name)
         self.CLASS_INFO = str(class_info).split("-")[0] if "-" in str(class_info) else str(class_info)
         self.PROFESSORS = str(class_info).split("-")[1] if "-" in str(class_info) else "Nenhum"
-        self.HOUR = str(hour)
+        self.HOUR = self.format_hour(hour)
         self.DAY = str(day)
+
+    def format_hour(self, hour):
+        # Check if the hour is already in the correct format
+        if re.match(r'\d{2}h\d{2}-\d{2}h\d{2}', hour):
+            return hour
+        else:
+            try:
+                start, end = hour.split(' - ')
+                start_time = datetime.strptime(start, '%Hh%M')
+                end_time = datetime.strptime(end, '%Hh%M')
+                return f"{start_time.strftime('%Hh%M')}-{end_time.strftime('%Hh%M')}"
+            except ValueError:
+                # If the split operation fails, return the hour as is
+                return hour
 
     def __str__(self) -> str:
         return f"Nome: {self.NOME} Turma: {self.TURMA} Horário: {self.HORARIO} Dia: {self.DIA}"
@@ -52,7 +68,13 @@ for i, row in data_frame.iterrows():
 df_ucs = pd.DataFrame([vars(uc) for uc in ucs])
 
 # Group the UCs by name, professors, and class info
-unique_ucs = df_ucs.groupby(['NAME', 'PROFESSORS', 'CLASS_INFO'], as_index=False).agg({'HOUR': lambda x: list(x), 'DAY': lambda y: list(y)})
+unique_ucs = df_ucs.groupby(['NAME', 'PROFESSORS', 'CLASS_INFO'], as_index=False).agg({
+    'HOUR': lambda x: list(x),
+    'DAY': lambda y: list(y)
+})
+
+# Reset the index to add a unique ID to each row
+unique_ucs = unique_ucs.reset_index().rename(columns={'index': 'ID'})
 
 # Convert the data frame to JSON
 result = unique_ucs.to_json(orient='records')
