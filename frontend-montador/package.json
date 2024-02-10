@@ -2,7 +2,7 @@
   "name": "montador",
   "version": "1.0.0",
   "type": "module",
-  "description": "A Vue.js project",
+  "description": "Montador de Grades em VueJS",
   "private": true,
   "scripts": {
     "dev": "vite",

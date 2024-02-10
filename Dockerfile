@@ -1,5 +1,5 @@
 # Etapa de construção para a aplicação Vue
-FROM node:16 as build-stage
+FROM node:20-alpine as build-stage
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY frontend-montador/ .
 RUN npm run build
 
 # Etapa final para a aplicação Express
-FROM node:16
+FROM node:20-alpine
 
 WORKDIR /app
 
