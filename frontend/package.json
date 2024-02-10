@@ -5,9 +5,10 @@
   "description": "Montador de Grades em VueJS",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "bunx --bun vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "production": "bunx --bun vite build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",

@@ -2,8 +2,12 @@
   "name": "backend-montador",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "main": "app.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start:dev": "bun --watch app.js",
+    "start": "bun run app.js",
+    "dev": "bun --watch app.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
