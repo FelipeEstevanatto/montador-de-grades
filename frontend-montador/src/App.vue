@@ -127,12 +127,21 @@
                     @updateValue="updateValue"
                   ></ListaUC>
                 </div>
+<<<<<<< HEAD:src/App.vue
                 <Switch
                   v-model="btn_state"
                   text="Mostrar Disciplinas Indisponíveis"
                   id="btn_state"
                 />
               </div>
+=======
+                <CustomButton v-show="false"
+                  class="mt-2 py-2 px-12 border-black uppercase w-full h-auto" 
+                  @click="change_btn_state_conflict()"
+                >
+                  <span class="text-wrap ">Remover Disciplinas Indisponíveis</span>
+              </CustomButton>
+>>>>>>> 225096f502480d37c4045beacad6e432ea31121f:frontend-montador/src/App.vue
             </div>
           </div>
         </div>
@@ -258,6 +267,7 @@ export default {
       this.table[rowIndex][colIndex] = "";
 
       return;
+<<<<<<< HEAD:src/App.vue
     },
     // Updates the table with the selected subjects
     updateTable(object, value) {
@@ -268,11 +278,24 @@ export default {
           const horarioIndex = this.hours.indexOf(horario);
           this.table[horarioIndex][diaIndex] = value;
         });
+=======
+    }, 
+    updateTable(obj, valor){
+      obj.DIA.forEach( (dia, index)  => {
+        const diaIndex = this.daysOfWeek.indexOf(dia);
+        const horarioIndex = obj.DIA.indexOf(dia);
+        const horario = obj.HORARIO[index];
+        const horarioIndex2 = this.hours.indexOf(horario);
+        this.tabela[horarioIndex2][diaIndex] = valor;
+        // alert(dia)
+        // alert(horario)
+>>>>>>> 225096f502480d37c4045beacad6e432ea31121f:frontend-montador/src/App.vue
       });
     },
     updateValue(value) {
       this.updateTable(value, value);
 
+<<<<<<< HEAD:src/App.vue
       if (this.SelectedIdsList.some((item) => item.ID == value.ID)) {
         return;
       }
@@ -281,6 +304,15 @@ export default {
 
       this.showModal = false;
       this.credits += value.HOUR.length;
+=======
+      this.ListaIdsSelecionadas.push(value)
+      //alert(this.ListaIdsSelecionadas)
+      localStorage.ListaIdsSelecionadas = JSON.stringify(this.ListaIdsSelecionadas)
+  
+      this.showModal = false
+      this.quantidade += value.HORARIO.length
+  
+>>>>>>> 225096f502480d37c4045beacad6e432ea31121f:frontend-montador/src/App.vue
     },
 
     cleanAll() {
